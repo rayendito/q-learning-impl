@@ -1,4 +1,5 @@
 from random import random
+import time
 
 def printBoard(idx):
     agentPos = [" " for i in range(10)]
@@ -11,7 +12,17 @@ def printBoard(idx):
 
 def learn(qTable, sqWeight, currPos, action):
     # learning rate 1, berarti langsung update q value
-    qTable[currPos, action] = sqWeight[currPos+action]+max(qTable[currPos+action][0], qTable[currPos+action][1])
+    # ugly code ik :()
+    if(action == 1):
+        idex = 1
+    else:
+        idex = 0
+    try:
+        qTable[currPos][idex] = sqWeight[currPos] + max(qTable[currPos+action][0], qTable[currPos+action][1])
+    except:
+        print(idex)
+        print(currPos)
+        print(action)
     
 
 def main(learnSteps):
@@ -34,7 +45,7 @@ def main(learnSteps):
     print("learning...")
     while(0 < learnSteps):
         # random dan inisialisasi epsilon
-        epsilon = 1
+        epsilon = 0.5
         action = 0
         r = random()
 
@@ -42,9 +53,15 @@ def main(learnSteps):
         if(r < epsilon):
             m = random()
             if(m <= 0.5):
-                action = -1
-            else:
-                action = 1
+                if(playerPosIdx == 0):
+                    action = 1
+                else:
+                    action = -1
+            elif(0.5 < m):
+                if(playerPosIdx == 9):
+                    action = -1
+                else:
+                    action = 1
         # exploit
         else:
             if(qTable[playerPosIdx][0] > qTable[playerPosIdx][1]):
@@ -53,20 +70,23 @@ def main(learnSteps):
                 action = 1
         
         # move and learn by ngupdate qtable nya
-        playerPosIdx += action
         learn(qTable, sqWeight,  playerPosIdx, action)
+        playerPosIdx += action
         
         # printing hihi
-        print(qTable)
-        printBoard(playerPosIdx)
+        # print(qTable)
+        # printBoard(playerPosIdx)
+        # time.sleep(1)
 
         # updating values
-        epsilon -= 1/(orLearn//2)
-        learnSteps =- 1
+        epsilon -= 0.05
+        learnSteps -= 1
     
+    print(qTable)
+    print("I've learnt enough time to explore")
     # if(playerPosIdx == 9):
     #     print("Menang!")
     # else:
     #     print("Wait, this got printed?")
 
-main(12)
+main(20)
